@@ -1,182 +1,138 @@
-# Private List Check (ZAMA FHEVM)
+# Private Cart — Encrypted Shopping Cart on Zama FHEVM
 
-Privacy-preserving whitelist/blacklist membership check on Ethereum (Sepolia) using **Fully Homomorphic Encryption (FHE)** on Zama’s FHEVM.
+Aggregated totals without revealing individual items. Users add **encrypted prices** and a **category** to a cart; the smart contract stores **only encrypted aggregates** (sum per cart and per category bucket). Individual items are never stored or emitted.
 
-> **Goal:** let a user prove whether an address is **IN** or **OUT** of a confidential set **without revealing the address or the set**. Only an encrypted boolean is written on-chain; the UI publicly decrypts that boolean later. No raw addresses are ever logged to the console or sent to the chain.
 
----
+## ✨ What this project demonstrates
 
-## ✨ Features
-
-* **Private membership check** for an input address (encrypted `eaddress`).
-* **Encrypted set** of members stored on-chain; comparison uses `FHE.eq` **only**.
-* **Public result**: contract marks the result `makePubliclyDecryptable`, so anyone can call `publicDecrypt(...)`.
-* **Admin helpers** to add addresses to **whitelist** or **blacklist** (the UI encrypts the raw address locally before calling the contract).
-* **No address leakage**: UI logs only handles, proofs, tx hashes, and decrypted booleans.
-* **Pure static frontend** (no bundler needed) powered by **Zama Relayer SDK**.
+* **FHE on-chain**: all arithmetic (sum, category counters) runs on encrypted values using Zama FHEVM.
+* **Privacy by design**: only *final totals* and *category aggregates* are kept; no item list exists on-chain.
+* **Optional public transparency**: the owner can flip aggregates to be publicly decryptable for dashboards.
+* **User private reads**: when not public, users can request per-handle decryption via `userDecrypt` (Relayer SDK, EIP‑712).
 
 ---
 
-## 🔧 Tech Stack
+## 🧱 Architecture
 
-* **Solidity** (Zama FHEVM):
+* **Solidity (FHE)** — `PrivateCart` contract using `@fhevm/solidity` primitives (`FHE`, `euint64`, `ebool`, etc.).
 
-  * `import { FHE, ebool, eaddress, externalEaddress } from "@fhevm/solidity/lib/FHE.sol"`
-  * Access control with `FHE.allow/allowThis` and **public decrypt** via `FHE.makePubliclyDecryptable`.
-* **Frontend**: Vanilla HTML/JS + **Zama Relayer SDK** (official)
+  * `initCart(cartId, owner)` — creates/clears a cart and binds an owner.
+  * `addItem(cartId, priceExt, category, proof)` — folds encrypted `price` (uint64 cents) into totals; increments a category counter. No item details are stored.
+  * `makeCartPublic(cartId)` — toggles aggregates to publicly decryptable.
+  * `getAggregateHandles(cartId)` — returns `bytes32` handles for: total and each category bucket.
+  * `ownerOf(cartId)` — plain owner address, used by the UI to show admin tools.
 
-  * `createInstance`, `createEncryptedInput`, `publicDecrypt`.
-  * Ethers v6 for wallet & contract calls.
+* **Frontend (Vanilla HTML/JS)** — single file at `frontend/public/index.html` (no bundler):
 
-> Documentation: Zama Relayer SDK — [https://docs.zama.ai/protocol/relayer-sdk-guides/](https://docs.zama.ai/protocol/relayer-sdk-guides/)
-
----
-
-## 🏗️ How it works
-
-1. The UI takes an input **address** and encrypts it in the browser via the Relayer SDK, producing a **ciphertext handle** + **proof**.
-2. The contract iterates through its encrypted set (whitelist or blacklist) and uses **`FHE.eq`** to compare with the input `eaddress`.
-3. The contract emits an event with a **result handle** (encrypted boolean) and flags it as **publicly decryptable**.
-4. The UI invokes **`publicDecrypt`** on that handle to display **IN** or **OUT**.
-
-**Security notes**
-
-* Only the encrypted boolean is ever published. Raw addresses and the set members remain encrypted.
-* Console logging is trimmed to exclude raw addresses.
+  * **ethers v6** for wallet & txs.
+  * **Relayer SDK v0.2.0** to encrypt inputs (`createEncryptedInput.add64`) and to perform `publicDecrypt` / `userDecrypt`.
+  * Minimal, dark UI with sections for **Submit encrypted item**, **Cart admin tools**, **Read aggregates**.
 
 ---
 
-## 🧱 Contract
-
-* **Network**: Sepolia (chainId `11155111`)
-* **Address**: `0x8Ac1d3E49A73F8328e43719dCF6fBfeF4405937B`
-* **KMS (Sepolia)**: `0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC`
-* **Key methods (public result)**:
-
-  * `checkWhitelistPublic(bytes32 addrExt, bytes proof) → bytes32`
-  * `checkBlacklistPublic(bytes32 addrExt, bytes proof) → bytes32`
-  * `getLastResultHandle() → bytes32`
-* **Admin methods (UI encrypts the input address before calling):**
-
-  * `addToWhitelist(bytes32 addrExt, bytes proof)`
-  * `addToBlacklist(bytes32 addrExt, bytes proof)`
-* **Event:** `MembershipChecked(address user, bool isWhitelist, uint256 scannedCount, bytes32 resultHandle)`
-
-> Implementation follows Zama guidance: only `FHE.eq` over `eaddress`, **no** arithmetic on `eaddress`.
-
----
-
-## 📁 Repository Layout
+## 🗂️ Folders
 
 ```
 frontend/
   public/
-    index.html        # Standalone UI (no build step)
+    index.html        # SPA UI
 contracts/
-  PrivateListCheck.sol
-scripts/              # optional
-hardhat.config.ts     # if you use Hardhat for local tasks
+  PrivateCart.sol     # FHEVM contract (example)
 ```
 
 ---
 
-## 🚀 Quick Start (Frontend)
+## 🔑 Smart‑contract API (summary)
 
-**Prerequisites:** MetaMask, Node.js (optional for serving static files).
+```solidity
+// init or reset aggregates and set owner
+function initCart(bytes32 cartId, address owner) external;
 
-### Option A — open as a static file
+// add one encrypted item (price = uint64 cents), category in [0..7]
+function addItem(bytes32 cartId, externalEuint64 priceExt, uint8 category, bytes calldata proof) external;
 
-* Open `frontend/public/index.html` directly in a modern browser.
-* If your browser blocks crypto features from file://, use Option B below.
+// make per-cart aggregates publicly decryptable
+function makeCartPublic(bytes32 cartId) external;
 
-### Option B — serve locally
+// read encrypted handles for total and category buckets
+function getAggregateHandles(bytes32 cartId)
+  external view returns (bytes32 totalH, bytes32[8] memory categoryHs);
 
-```bash
-# from repo root
-npx serve frontend/public -p 5173    # or any static server
-# then open http://localhost:5173
+function ownerOf(bytes32 cartId) external view returns (address);
 ```
 
-Alternatives:
-
-```bash
-# python
-python3 -m http.server --directory frontend/public 5173
-# or
-npx http-server frontend/public -p 5173 --cors
-```
-
-### Using the dApp
-
-1. Click **Connect MetaMask** (network auto-switches to **Sepolia** if needed).
-2. Choose **Whitelist** or **Blacklist** and paste an address to check (0x…).
-3. Press **Check** → the app encrypts & sends, then shows **IN** or **OUT**.
-4. You can later press **Decrypt Last Result** to re-decrypt the last emitted handle.
-
-### Admin (optional)
-
-* As the contract owner, paste an address into the **Admin** panel and use:
-
-  * **Add to Whitelist** or **Add to Blacklist** — the UI encrypts the address, then calls the contract.
+> Buckets are an example (e.g. **Food, Electronics, Books, Fashion, Home, Beauty, Sports, Other**). You can change the mapping in the UI only; the contract stores indexes 0..7.
 
 ---
 
-## 🧩 Installation (full project)
+## ⚙️ Configuration
+
+Open `frontend/public/index.html` and set the config at the top of the script:
+
+```js
+window.CONFIG = {
+  NETWORK_NAME: "Sepolia",
+  CHAIN_ID_HEX: "0xaa36a7",                // 11155111
+  CONTRACT_ADDRESS: "0xYourPrivateCart...", // deployed PrivateCart
+  RELAYER_URL: "https://relayer.testnet.zama.cloud"
+};
+```
+
+---
+
+## 🚀 Quick start
+
+### 1) Install deps for contracts (optional)
 
 ```bash
-# 1) Clone
-git clone https://github.com/<your-org>/<your-repo>.git
-cd <your-repo>
+pnpm i     # or npm i / yarn
+```
 
-# 2) (optional) Install deps if you plan to compile/deploy contracts
-npm i
+### 2) Deploy the contract (example with Foundry/Hardhat)
 
-# 3) Frontend — run a static server
+```bash
+# Foundry
+forge create --rpc-url $SEPOLIA_RPC --private-key $PK \
+  src/PrivateCart.sol:PrivateCart
+# copy the deployed address into CONFIG.CONTRACT_ADDRESS
+```
+
+### 3) Serve the frontend
+
+Any static server works. Examples:
+
+```bash
+# Using serve
 npx serve frontend/public -p 5173
+# Or simple python
+python3 -m http.server --directory frontend/public 5173
 ```
 
-**Download as ZIP:**
-If this repo is on GitHub, you can download directly:
-
-```
-https://github.com/<your-org>/<your-repo>/archive/refs/heads/main.zip
-```
-
-> Replace `<your-org>/<your-repo>` with your namespace.
+Open [http://localhost:5173](http://localhost:5173) and **Connect Wallet**.
 
 ---
 
-## 🔗 Relayer/Gateway (Testnet)
+## 🧪 How to use
 
-* **Relayer URL**: `https://relayer.testnet.zama.cloud`
-* **Chain**: Sepolia `11155111`
-* **KMS**: `0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC`
+1. **Admin:** choose a *cart key* (arbitrary text) → UI hashes it to `bytes32 cartId`.
+2. Click **Init/Reset Cart**. This sets you as the cart owner.
+3. **User:** add items via **Submit encrypted item**:
 
----
+   * Enter the same *cart key*.
+   * Price in cents (e.g., 12.34 USD → `1234`).
+   * Category bucket (Food / Electronics / …).
+   * Click **Add Encrypted Item**.
+4. **Read aggregates**:
 
-## 🧪 Console Logging
+   * If owner made aggregates public → click **Read (publicDecrypt → userDecrypt)** to show totals.
+   * If not public → UI requests an EIP‑712 signature and calls Relayer `userDecrypt` for your address.
 
-The console prints only:
-
-* encryption **handle** and **proof** length (never raw addresses),
-* transaction hash and receipt summary,
-* the decrypted boolean value.
-
-To disable logging entirely, search for the small `clog` helper in `index.html` and no-op the calls.
-
----
-
-## ❗ Troubleshooting
-
-* **“Handle … is not allowed for public decryption”**
-  You likely called a non-public method. Use `checkWhitelistPublic` / `checkBlacklistPublic` from the UI.
-* **Invalid address**
-  The UI requires EIP-55 compatible `0x` address (40 hex chars). It validates before sending.
-* **Wrong network**
-  MetaMask must be on **Sepolia**. The app will try to switch automatically.
+> The contract never stores item lines — only encrypted aggregates per cart.
 
 ---
 
-## ✅ License
+## 📄 License
 
-MIT — feel free to use and adapt.
+MIT — see `LICENSE`.
+
+

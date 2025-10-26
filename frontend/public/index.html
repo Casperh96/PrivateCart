@@ -1,259 +1,327 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin" />
-    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
-    <title>Private List Check · ZAMA FHEVM (v2)</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-      :root{
-        --bg: #faf7f2;           /* light sand */
-        --ink:#10121a;           /* near-black text */
-        --muted:#6b7280;         /* slate */
-        --card:#ffffff;          /* white cards */
-        --stroke:#e7e2da;        /* warm border */
-        --shadow: 0 10px 30px rgba(17,18,26,.08);
-        --radius:16px;
-        --brand:#7c3aed;         /* violet */
-        --accent:#f59e0b;        /* amber */
-        --ok:#10b981;            /* green */
-        --bad:#ef4444;           /* red */
-      }
-      *{box-sizing:border-box}
-      html,body{height:100%}
-      body{
-        font-family:'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-        color:var(--ink);
-        background:
-          radial-gradient(900px 500px at 0% 0%, #eae2ff40, transparent 60%),
-          radial-gradient(800px 600px at 100% 0%, #ffecc240, transparent 60%),
-          var(--bg);
-        margin:0;
-      }
-      .container{max-width:1200px;margin:0 auto;padding:28px 16px 56px}
-      header{
-        display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;margin-bottom:22px;
-      }
-      .brand{display:flex;align-items:center;gap:14px}
-      .logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#a78bfa);box-shadow:var(--shadow)}
-      h1{font-size:clamp(22px,3.2vw,30px);margin:0;font-weight:800}
-      .sub{font-size:13px;color:var(--muted)}
-      .top-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-      .pill{font-size:12px;color:var(--muted);border:1px solid var(--stroke);padding:8px 10px;border-radius:999px;background:#fff7}
-      .btn{appearance:none;border:1px solid var(--stroke);background:linear-gradient(180deg,#fff,#f8f7f5);padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:800;letter-spacing:.2px;box-shadow:var(--shadow);}
-      .btn:disabled{opacity:.5;cursor:not-allowed}
-      .btn.primary{background:linear-gradient(135deg,#a78bfa,#7c3aed);color:white;border:0}
-      .btn.accent{background:linear-gradient(135deg,#ffd166,#f59e0b);color:#251a00;border:0}
-      .btn.ok{background:linear-gradient(135deg,#34d399,#10b981);color:white;border:0}
-      .btn.bad{background:linear-gradient(135deg,#f87171,#ef4444);color:white;border:0}
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Private Shopping Cart — Zama FHEVM</title>
+  <style>
+    :root{
+      --bg:#0b1220;--card:#111a2b;--text:#e6f0ff;--muted:#94a3b8;--accent:#60a5fa;--ok:#22c55e;--warn:#f59e0b;
+      --bd:#223049;--br:16px;--shadow:0 18px 50px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(1200px 800px at 20% -10%,#0e1730,#0b1220);color:var(--text);font:16px/1.45 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1080px;margin:26px auto;padding:0 16px}
+    header{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    .logo{font-weight:800;letter-spacing:.2px}
+    .logo span{color:#22d3ee}
+    .badge{background:rgba(255,255,255,.04);border:1px solid var(--bd);color:#cfe3ff;border-radius:999px;padding:6px 10px;font-size:12px}
+    .btn{background:#1b2b49;border:1px solid #2a3c63;color:#dceafe;padding:10px 14px;border-radius:12px;cursor:pointer}
+    .btn.primary{background:#20345a}
+    .btn.accent{background:#1f2d46;border-color:#35507c}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .card{background:var(--card);border:1px solid var(--bd);border-radius:var(--br);padding:16px;box-shadow:var(--shadow)}
+    label{display:block;color:var(--muted);font-weight:600;margin-bottom:6px}
+    input,select{width:100%;background:#0f172a;border:1px solid #24385f;border-radius:12px;padding:10px 12px;color:#dbeafe;outline:none}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .kv{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center}
+    .status{margin-top:8px;color:#9fb3cc;font-size:13px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px dashed #37517d;color:#bcd1ff;font-size:12px}
+    pre{background:#0c1428;border:1px dashed #274369;border-radius:12px;padding:10px;white-space:pre-wrap;word-break:break-word;color:#cfe3ff}
+    .meter{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{background:#0e1a33;border:1px solid #28406a;border-radius:12px;padding:6px 10px;color:#98b7ff}
+    .ok{color:var(--ok)} .warn{color:var(--warn)}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1 class="logo">Private <span>Cart</span></h1>
+    <span id="netBadge" class="badge">Network: —</span>
+    <span id="ctrBadge" class="badge">Contract: —</span>
+    <button id="connectBtn" class="btn primary" style="margin-left:auto">Connect Wallet</button>
+  </header>
 
-      /* GRID: radically new layout */
-      .grid{display:grid;grid-template-columns: 1.2fr .8fr; gap:18px}
-      .row{display:grid;grid-template-columns:1fr 1fr; gap:18px}
-      @media (max-width: 980px){ .grid{grid-template-columns:1fr} .row{grid-template-columns:1fr} }
+  <div class="grid">
+    <!-- Left: user -->
+    <section class="card">
+      <h3>Submit encrypted item</h3>
+      <div class="kv"><label>Cart key (any text)</label><input id="cartKey" placeholder="e.g. my-cart-42"/></div>
+      <div class="kv"><label>Price (uint64, cents)</label><input id="price" type="number" min="0" placeholder="e.g. 2499"/></div>
+      <div class="kv">
+        <label>Category</label>
+        <select id="category">
+          <option value="0">0 — Food</option>
+          <option value="1">1 — Electronics</option>
+          <option value="2">2 — Books</option>
+          <option value="3">3 — Fashion</option>
+          <option value="4">4 — Home</option>
+          <option value="5">5 — Beauty</option>
+          <option value="6">6 — Sports</option>
+          <option value="7">7 — Other</option>
+        </select>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button id="addBtn" class="btn accent">Add Encrypted Item</button>
+        <button id="checkOwnerBtn" class="btn">Owner?</button>
+        <span id="userStatus" class="status"></span>
+      </div>
+      <div id="txBox" class="status"></div>
 
-      .card{background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius); padding:18px 18px 16px; box-shadow:var(--shadow)}
-      .card h2{font-size:16px;margin:0 0 12px 0;font-weight:800;display:flex;align-items:center;gap:10px}
-      .kbd{border:1px solid var(--stroke);background:#fbfaf9;padding:2px 6px;border-radius:6px;font-size:12px;color:var(--muted)}
+      <div style="margin-top:12px">
+        <span class="pill">Aggregates only • Fully Homomorphic (Zama FHEVM)</span>
+      </div>
+    </section>
 
-      .field{margin-bottom:12px}
-      .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-      .input, select{width:100%;padding:12px 12px;border:1px solid var(--stroke);border-radius:12px;outline:none;background:white;font-size:15px}
-      .input:focus, select:focus{border-color:#c4b5fd; box-shadow:0 0 0 3px #c4b5fd40}
-      .row-actions{display:flex;gap:10px;flex-wrap:wrap}
+    <!-- Right: admin of cart -->
+    <section class="card">
+      <h3>Cart admin tools</h3>
+      <div class="kv"><label>Cart key</label><input id="adminCartKey" placeholder="same as left"/></div>
+      <div class="row" style="margin-top:8px">
+        <button id="initBtn" class="btn">Init/Reset Cart</button>
+        <button id="makePublicBtn" class="btn">Make Aggregates Public</button>
+        <span id="adminStatus" class="status"></span>
+      </div>
 
-      .status{margin-top:10px;padding:12px;border-radius:12px;border:1px dashed var(--stroke);background:#fff7;color:var(--muted);font-weight:700}
-      .result{display:none;margin-top:10px;padding:14px;border-radius:12px;border:1px solid var(--stroke);text-align:center;font-weight:900}
-      .result.ok{color:var(--ok);border-color:#34d39980;background:#ecfdf5}
-      .result.bad{color:var(--bad);border-color:#f8717180;background:#fef2f2}
+      <h4 style="margin-top:14px">Handles (for audit)</h4>
+      <div class="meter">
+        <span class="chip">total: <span id="hTotal">—</span></span>
+      </div>
+      <pre id="hCats">cats: —</pre>
+    </section>
+  </div>
 
-      footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
-      .loading{position:relative}
-      .loading::after{content:"";position:absolute;right:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;border:2px solid #00000022;border-top-color:#00000066;animation:spin 1s linear infinite}
-      @keyframes spin{to{transform:translateY(-50%) rotate(1turn)}}
-      code{background:#fbfaf9;border:1px solid var(--stroke);padding:2px 6px;border-radius:6px}
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <div class="brand">
-          <div class="logo"></div>
-          <div>
-            <h1>Private List Check</h1>
-            <div class="sub">ZAMA · FHEVM · Sepolia</div>
-          </div>
-        </div>
-        <div class="top-actions">
-          <span class="pill">Network: <b id="netInfo">—</b></span>
-          <span class="pill">Account: <b id="acctInfo">—</b></span>
-          <button id="btnConnect" class="btn primary">Connect MetaMask</button>
-        </div>
-      </header>
-
-      <!-- NEW LAYOUT: main left column is the Private Check, right column stacks Contract + Admin -->
-      <section class="grid">
-        <!-- LEFT: Private Check (wide) -->
-        <div class="card">
-          <h2>Private Check <span class="kbd">encrypted</span></h2>
-          <div class="row">
-            <div class="field">
-              <label>Address to check</label>
-              <input id="addr" class="input" placeholder="0x1234…" />
-            </div>
-            <div class="field">
-              <label>Mode</label>
-              <select id="mode">
-                <option value="whitelist">Whitelist</option>
-                <option value="blacklist">Blacklist</option>
-              </select>
-            </div>
-          </div>
-          <div class="row-actions" style="margin:6px 0 2px">
-            <button id="btnCheck" class="btn accent" disabled>Check</button>
-            <button id="btnLast" class="btn" disabled>Decrypt Last Result</button>
-          </div>
-          <div id="status" class="status">Waiting for connection…</div>
-          <div id="result" class="result">—</div>
-        </div>
-
-        <!-- RIGHT: Contract info + Admin stacked -->
-        <div class="row">
-          <div class="card">
-            <h2>Contract</h2>
-            <div class="field"><label>Address</label><div class="pill" style="display:inline-block;user-select:all">0x8Ac1d3E49A73F8328e43719dCF6fBfeF4405937B</div></div>
-            <div class="field"><label>Mode</label><div class="pill">KMS (Sepolia)</div></div>
-            <div class="field"><label>KMS</label><div class="pill" style="display:inline-block;user-select:all">0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC</div></div>
-          </div>
-          <div class="card">
-            <h2>Admin (optional)</h2>
-            <div class="field">
-              <label>Address to add (UI encrypts it)</label>
-              <input id="adminHandle" class="input" placeholder="0xabc…" />
-            </div>
-            <div class="row-actions">
-              <button id="btnAddW" class="btn ok" disabled>Add to Whitelist</button>
-              <button id="btnAddB" class="btn bad" disabled>Add to Blacklist</button>
-            </div>
-            <div style="margin-top:8px;color:var(--muted);font-size:12px">Owner-only actions. The raw address never leaves the browser.</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card" style="margin-top:18px">
-        <h2>How it works</h2>
-        <ol style="margin:0;padding-left:18px;color:var(--muted);line-height:1.6">
-          <li>Address is encrypted locally via ZAMA Relayer SDK.</li>
-          <li>Contract iterates over encrypted set and compares using <code>FHE.eq</code>.</li>
-          <li>Only encrypted boolean is published; UI requests <code>publicDecrypt</code>.</li>
-        </ol>
-      </section>
-
-      <footer>
-        UI language: English · This page logs handles/proofs/tx hashes only (no raw addresses).
-      </footer>
+  <section class="card" style="margin-top:16px">
+    <h3>Read aggregates</h3>
+    <div class="kv"><label>Cart key</label><input id="readCartKey" placeholder="same key"/></div>
+    <div class="row" style="margin-top:8px">
+      <button id="readBtn" class="btn">Read (publicDecrypt → userDecrypt)</button>
+      <span id="readStatus" class="status"></span>
     </div>
+    <div class="meter" style="margin-top:10px">
+      <span class="chip">total: <b id="outTotal">—</b></span>
+      <span class="chip">Food: <b id="c0">—</b></span>
+      <span class="chip">Electronics: <b id="c1">—</b></span>
+      <span class="chip">Books: <b id="c2">—</b></span>
+      <span class="chip">Fashion: <b id="c3">—</b></span>
+      <span class="chip">Home: <b id="c4">—</b></span>
+      <span class="chip">Beauty: <b id="c5">—</b></span>
+      <span class="chip">Sports: <b id="c6">—</b></span>
+      <span class="chip">Other: <b id="c7">—</b></span>
+    </div>
+  </section>
 
-    <!-- Zama Relayer SDK (official) -->
-    <script type="module" crossorigin src="https://cdn.zama.ai/relayer-sdk-js/0.1.2/relayer-sdk-js.js"></script>
-    <!-- ethers v6 -->
-    <script type="module" crossorigin src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm"></script>
+  <footer class="status" style="text-align:center;margin-top:18px">
+    Relayer: v0.2.0 • ethers v6 • Demo UI
+  </footer>
+</main>
 
-    <script type="module">
-      import { BrowserProvider, Contract, getAddress } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
-      import { initSDK, createInstance, SepoliaConfig } from "https://cdn.zama.ai/relayer-sdk-js/0.1.2/relayer-sdk-js.js";
+<script type="module">
+  import { BrowserProvider, Contract, getAddress, Interface, keccak256, toUtf8Bytes } from "https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm";
+  import { initSDK, createInstance, SepoliaConfig, generateKeypair } from "https://cdn.zama.ai/relayer-sdk-js/0.2.0/relayer-sdk-js.js";
 
-      // ===== Console helpers (simple) =====
-      const clog = {
-        banner(){ console.log('Private List Check ready'); },
-        group:t=>console.log(`--- ${t} ---`),
-        end:()=>{}, table:o=>console.log(o), kv:(k,v)=>console.log(`${k}:`, v)
-      }; clog.banner();
+  // ===== Config — подставьте адрес своего контракта после деплоя =====
+  const CONFIG = {
+    NETWORK_NAME: "Sepolia",
+    CHAIN_ID_HEX: "0xaa36a7",
+    CONTRACT_ADDRESS: "0x92b8Ff5402eFBFB8023Bd48771266cC58C429800",   // <— ЗАМЕНИТЕ после деплоя!
+    RELAYER_URL: "https://relayer.testnet.zama.cloud",
+    MAX_CATS: 8
+  };
 
-      // ===== DOM =====
-      const $ = (id)=>document.getElementById(id);
-      const btnConnect = $("btnConnect");
-      const btnCheck   = $("btnCheck");
-      const btnLast    = $("btnLast");
-      const btnAddW    = $("btnAddW");
-      const btnAddB    = $("btnAddB");
-      const addrInput  = $("addr");
-      const adminHandle= $("adminHandle");
-      const statusEl   = $("status");
-      const resultEl   = $("result");
-      const netInfo    = $("netInfo");
-      const acctInfo   = $("acctInfo");
-      const modeSel    = $("mode");
+  // ===== ABI =====
+  const ABI = [
+    {"inputs":[{"internalType":"bytes32","name":"cartId","type":"bytes32"},{"internalType":"address","name":"owner","type":"address"}],"name":"initCart","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[{"internalType":"bytes32","name":"cartId","type":"bytes32"},{"internalType":"bytes32","name":"priceExt","type":"bytes32"},{"internalType":"bytes32","name":"catExt","type":"bytes32"},{"internalType":"bytes","name":"proof","type":"bytes"}],"name":"addItem","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[{"internalType":"bytes32","name":"cartId","type":"bytes32"}],"name":"makeCartPublic","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[{"internalType":"bytes32","name":"cartId","type":"bytes32"}],"name":"getTotalHandle","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},
+    {"inputs":[{"internalType":"bytes32","name":"cartId","type":"bytes32"}],"name":"getCategoryHandles","outputs":[{"internalType":"bytes32[8]","name":"","type":"bytes32[8]"}],"stateMutability":"view","type":"function"},
+    {"inputs":[{"internalType":"bytes32","name":"cartId","type":"bytes32"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+    {"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"cartId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"owner","type":"address"}],"name":"CartInitialized","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"cartId","type":"bytes32"},{"indexed":false,"internalType":"bytes32","name":"totalHandle","type":"bytes32"}],"name":"ItemAdded","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"cartId","type":"bytes32"}],"name":"CartMadePublic","type":"event"}
+  ];
 
-      // ===== Config =====
-      const CONTRACT_ADDRESS = getAddress("0x8Ac1d3E49A73F8328e43719dCF6fBfeF4405937B");
-      const RELAYER_URL = "https://relayer.testnet.zama.cloud";
-      const KMS_ADDRESS = getAddress("0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC");
-      const CHAIN_HEX = "0xaa36a7"; // Sepolia
-      const CHAIN_ID  = 11155111n;
+  // ===== helpers =====
+  const $ = s => document.querySelector(s);
+  const short = a => a ? a.slice(0,6)+"…"+a.slice(-4) : "—";
+  const cartIdOf = (key) => keccak256(toUtf8Bytes(key || ""));
 
-      // ===== ABI =====
-      const abi = [
-        { inputs:[{name:"addrExt",type:"bytes32"},{name:"proof",type:"bytes"}], name:"checkWhitelistPublic", outputs:[{name:"",type:"bytes32"}], stateMutability:"nonpayable", type:"function" },
-        { inputs:[{name:"addrExt",type:"bytes32"},{name:"proof",type:"bytes"}], name:"checkBlacklistPublic", outputs:[{name:"",type:"bytes32"}], stateMutability:"nonpayable", type:"function" },
-        { inputs:[{name:"addrExt",type:"bytes32"},{name:"proof",type:"bytes"}], name:"addToWhitelist", outputs:[], stateMutability:"nonpayable", type:"function" },
-        { inputs:[{name:"addrExt",type:"bytes32"},{name:"proof",type:"bytes"}], name:"addToBlacklist", outputs:[], stateMutability:"nonpayable", type:"function" },
-        { inputs:[], name:"getLastResultHandle", outputs:[{name:"",type:"bytes32"}], stateMutability:"view", type:"function" },
-        { anonymous:false, inputs:[
-            {indexed:true,name:"user",type:"address"},
-            {indexed:false,name:"isWhitelist",type:"bool"},
-            {indexed:false,name:"scannedCount",type:"uint256"},
-            {indexed:false,name:"resultHandle",type:"bytes32"}
-          ], name:"MembershipChecked", type:"event" }
-      ];
+  // badges
+  $('#netBadge').textContent = `Network: ${CONFIG.NETWORK_NAME}`;
+  $('#ctrBadge').textContent = `Contract: ${short(CONFIG.CONTRACT_ADDRESS)}`;
 
-      // ===== State =====
-      let provider, signer, user, relayer, contract; let lastHandle = null;
+  // ===== state =====
+  let provider, signer, address, contract, relayer;
 
-      // ===== UI helpers =====
-      const setStatus = (t)=> statusEl.textContent=t;
-      function showResult(ok){ resultEl.style.display='block'; resultEl.classList.remove('ok','bad'); resultEl.classList.add(ok?'ok':'bad'); resultEl.textContent = ok? '✅ IN LIST' : '❌ OUT OF LIST'; }
-      const setLoading = (el,on)=> el && el.classList.toggle('loading', !!on);
-      function refreshButtons(){
-        const okAddr  = /^0x[0-9a-fA-F]{40}$/.test((addrInput.value||'').trim());
-        const okAdmin = /^0x[0-9a-fA-F]{40}$/.test((adminHandle.value||'').trim());
-        if (btnCheck) btnCheck.disabled = !signer || !okAddr;
-        if (btnAddW) btnAddW.disabled = !signer || !okAdmin;
-        if (btnAddB) btnAddB.disabled = !signer || !okAdmin;
+  async function ensureConnected(){
+    if(!window.ethereum) throw new Error("Install MetaMask");
+    if(!provider){
+      provider = new BrowserProvider(window.ethereum);
+      await provider.send('eth_requestAccounts', []);
+      const net = await provider.getNetwork();
+      if (net.chainId !== 11155111n){
+        await provider.send('wallet_switchEthereumChain', [{ chainId: CONFIG.CHAIN_ID_HEX }]);
       }
-      function validateAddress(raw){ const s=(raw||'').trim(); if(!s) throw new Error('Enter an address'); if(!/^0x[0-9a-fA-F]{40}$/.test(s)) throw new Error('Invalid address format (0x + 40 hex)'); return getAddress(s); }
-      addrInput.addEventListener('input', refreshButtons); adminHandle.addEventListener('input', refreshButtons);
+      signer = await provider.getSigner();
+      address = await signer.getAddress();
+      contract = new Contract(getAddress(CONFIG.CONTRACT_ADDRESS), ABI, signer);
+      $('#connectBtn').textContent = short(address);
+    }
+    if(!relayer){
+      await initSDK();
+      relayer = await createInstance({ ...SepoliaConfig, relayerUrl: CONFIG.RELAYER_URL, network: window.ethereum, debug: true });
+      console.log('[Relayer] ready', relayer?.config);
+    }
+    return { provider, signer, address, contract, relayer };
+  }
 
-      // ===== Network guards =====
-      async function ensureSepolia(){ const id = await window.ethereum.request({ method:'eth_chainId' }); if (BigInt(id)!==CHAIN_ID){ await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{chainId: CHAIN_HEX}] }); } }
+  // Encrypt (price uint64 + category uint16) → two handles + proof
+  const toHex = (u8) => '0x' + Array.from(u8, b => b.toString(16).padStart(2,'0')).join('');
+  async function encryptItem(contractAddr, userAddr, price, category){
+    const enc = relayer.createEncryptedInput(getAddress(contractAddr), getAddress(userAddr));
+    if (typeof enc.add64 === 'function') enc.add64(BigInt(price));
+    else enc.addUint64(BigInt(price));
+    if (typeof enc.add16 === 'function') enc.add16(BigInt(category));
+    else enc.addUint16(BigInt(category));
+    const { handles, inputProof } = await enc.encrypt();
+    const h0 = typeof handles[0] === 'string' ? handles[0] : toHex(handles[0]);
+    const h1 = typeof handles[1] === 'string' ? handles[1] : toHex(handles[1]);
+    const proof = typeof inputProof === 'string' ? (inputProof.startsWith('0x') ? inputProof : '0x'+inputProof) : toHex(inputProof);
+    return { priceHandle: h0, catHandle: h1, proof };
+  }
 
-      // ===== Relayer helpers =====
-      function addAddressToBuf(buf, address){ if (typeof buf.addAddress==='function'){ buf.addAddress(address); return 'addAddress'; } if (typeof buf.add160==='function'){ buf.add160(BigInt(address)); return 'add160'; } throw new Error('Relayer SDK missing addAddress/add160'); }
-      const toHex = (u8)=> '0x'+Array.from(u8).map(b=>b.toString(16).padStart(2,'0')).join('');
-      async function encryptAddress(address){ clog.group('ENCRYPTION'); const buf = relayer.createEncryptedInput(CONTRACT_ADDRESS, user); const used = addAddressToBuf(buf, address); clog.kv('inputMethod', used); const { handles, inputProof } = await buf.encrypt(); const handle = toHex(handles[0]); const proof = toHex(inputProof); clog.table({ handle, proofBytes: inputProof.length, proofPreview: proof.slice(0,66)+'…' }); clog.end(); return { handle, proof }; }
+  // publicDecrypt → userDecrypt
+  async function decryptMany(handles) {
+    const ca = getAddress(CONFIG.CONTRACT_ADDRESS);
+    // 1) попробуем publicDecrypt
+    try{
+      const out = await relayer.publicDecrypt(handles.map(h=>({handle:h, contractAddress:ca})));
+      const vals = handles.map(h => BigInt(out[h] ?? out[Object.keys(out).find(k=>k.toLowerCase()===h.toLowerCase())]));
+      return vals;
+    }catch(e){ console.debug('publicDecrypt failed → fallback to userDecrypt'); }
 
-      async function callCheckPublic(mode, handle, proof){ const fn = mode==='blacklist' ? 'checkBlacklistPublic' : 'checkWhitelistPublic'; clog.group('CALL (public)'); clog.table({ fn, handle, proofLen: proof.length }); const tx = await contract[fn](handle, proof, { gasLimit: 3_000_000 }); clog.kv('txHash', tx.hash); const receipt = await tx.wait(); clog.table({ blockNumber: receipt.blockNumber, gasUsed: receipt.gasUsed.toString(), status: receipt.status }); let evtHandle=null; for (const lg of receipt.logs){ try{ const parsed=contract.interface.parseLog(lg); if(parsed && parsed.name==='MembershipChecked'){ evtHandle = parsed.args.resultHandle; clog.kv('event.handle', evtHandle); break; } }catch{} } if(!evtHandle){ try{ evtHandle = await contract.getLastResultHandle(); clog.kv('getLastResultHandle()', evtHandle); }catch{} } clog.end(); if(!evtHandle) throw new Error('No public handle returned by contract'); lastHandle = evtHandle; return evtHandle; }
+    // 2) userDecrypt (EIP-712)
+    const kp = await generateKeypair();
+    const startTs = Math.floor(Date.now()/1000).toString();
+    const days = '7';
+    const eip = relayer.createEIP712(kp.publicKey, [ca], startTs, days);
+    const sig = await signer.signTypedData(eip.domain, { UserDecryptRequestVerification: eip.types.UserDecryptRequestVerification }, eip.message);
 
-      async function decryptPublic(handle){ clog.group('DECRYPT (public)'); const out = await relayer.publicDecrypt([handle]); const value = Array.isArray(out) ? out[0] : out[handle]; clog.table({ handle, decrypted: String(value) }); clog.end(); return (typeof value==='bigint') ? (value===1n) : (Number(value)===1); }
+    const pairs = handles.map(h => ({ handle:h, contractAddress:ca }));
+    const out = await relayer.userDecrypt(pairs, kp.privateKey, kp.publicKey, sig.replace(/^0x/,''), [ca], await signer.getAddress(), startTs, days);
+    return handles.map(h => BigInt(out[h] ?? out[Object.keys(out).find(k=>k.toLowerCase()===h.toLowerCase())]));
+  }
 
-      // ===== Connect =====
-      btnConnect.addEventListener('click', async ()=>{ try{ setLoading(btnConnect,true); if(!window.ethereum) throw new Error('MetaMask not found'); await ensureSepolia(); provider = new BrowserProvider(window.ethereum); await provider.send('eth_requestAccounts', []); signer = await provider.getSigner(); user = await signer.getAddress(); const net = await provider.getNetwork(); netInfo.textContent = `Sepolia (${net.chainId.toString()})`; acctInfo.textContent = `${user.slice(0,6)}…${user.slice(-4)}`; const code = await provider.getCode(KMS_ADDRESS); if(code==='0x') throw new Error('KMS contract not found'); await initSDK(); relayer = await createInstance({ ...SepoliaConfig, network: window.ethereum, relayerUrl: RELAYER_URL, debug:true }); contract = new Contract(CONTRACT_ADDRESS, abi, signer); setStatus('Connected. Ready to check.'); btnLast.disabled = false; refreshButtons(); clog.group('SETUP'); console.log('Ready'); clog.end(); }catch(e){ console.error(e); setStatus('❌ '+e.message); } finally{ setLoading(btnConnect,false); } });
+  // === UI ===
+  $('#connectBtn').addEventListener('click', async ()=>{
+    try{ await ensureConnected(); } catch(e){ alert(e.message||e); }
+  });
 
-      // ===== Actions =====
-      btnCheck.addEventListener('click', async ()=>{ try{ if(!signer || !relayer) throw new Error('Connect wallet first'); const address = validateAddress(addrInput.value); setLoading(btnCheck,true); setStatus('Encrypting & sending…'); resultEl.style.display='none'; const { handle, proof } = await encryptAddress(address); const publicHandle = await callCheckPublic(modeSel.value, handle, proof); const ok = await decryptPublic(publicHandle); showResult(ok); setStatus('✅ Done'); }catch(e){ console.error(e); setStatus('❌ '+e.message); } finally{ setLoading(btnCheck,false); } });
+  // init/reset
+  $('#initBtn').addEventListener('click', async ()=>{
+    const key = $('#adminCartKey').value.trim();
+    if(!key) return $('#adminStatus').textContent='Enter cart key';
+    try{
+      await ensureConnected();
+      const id = cartIdOf(key);
+      const tx = await contract.initCart(id, address);
+      $('#adminStatus').textContent = 'TX: ' + tx.hash;
+      await tx.wait();
+      $('#adminStatus').textContent = 'Cart initialized';
+    }catch(e){ $('#adminStatus').textContent = 'Error: '+(e.reason||e.message||e); }
+  });
 
-      btnLast.addEventListener('click', async ()=>{ try{ if(!relayer) throw new Error('Relayer not ready'); if(!lastHandle) throw new Error('No handle cached yet'); setLoading(btnLast,true); setStatus('Decrypting last result…'); const ok = await decryptPublic(lastHandle); showResult(ok); setStatus('✅ Done'); }catch(e){ console.error(e); setStatus('❌ '+e.message); } finally{ setLoading(btnLast,false); } });
+  // make public
+  $('#makePublicBtn').addEventListener('click', async ()=>{
+    const key = $('#adminCartKey').value.trim();
+    if(!key) return $('#adminStatus').textContent='Enter cart key';
+    try{
+      await ensureConnected();
+      const id = cartIdOf(key);
+      const tx = await contract.makeCartPublic(id);
+      $('#adminStatus').textContent = 'TX: ' + tx.hash;
+      await tx.wait();
+      $('#adminStatus').textContent = 'Aggregates made public';
+    }catch(e){ $('#adminStatus').textContent = 'Error: '+(e.reason||e.message||e); }
+  });
 
-      btnAddW.addEventListener('click', async ()=>{ try{ if(!contract) throw new Error('Connect first'); const address = validateAddress(adminHandle.value); setLoading(btnAddW,true); const { handle, proof } = await encryptAddress(address); clog.group('ADMIN addToWhitelist'); clog.table({ handle, proofLen: proof.length }); const tx = await contract.addToWhitelist(handle, proof, { gasLimit: 3_000_000 }); console.log('txHash', tx.hash); await tx.wait(); clog.end(); setStatus('✅ Added to whitelist (encrypted)'); }catch(e){ console.error(e); setStatus('❌ '+e.message); } finally{ setLoading(btnAddW,false); } });
+  // add encrypted item
+  $('#addBtn').addEventListener('click', async ()=>{
+    const key = $('#cartKey').value.trim();
+    const price = $('#price').value;
+    const cat = $('#category').value;
+    if(!key || price==='' || +cat<0) return $('#userStatus').textContent='Fill all fields';
+    try{
+      await ensureConnected();
+      const id = cartIdOf(key);
+      $('#userStatus').textContent = 'Encrypting…';
+      const { priceHandle, catHandle, proof } = await encryptItem(CONFIG.CONTRACT_ADDRESS, address, BigInt(price), BigInt(cat));
+      // отправляем без estimateGas — ethers сам поставит
+      const tx = await contract.addItem(id, priceHandle, catHandle, proof);
+      $('#txBox').textContent = 'TX: '+tx.hash;
+      await tx.wait();
+      $('#userStatus').textContent = 'Added.';
+    }catch(e){
+      console.error(e);
+      $('#userStatus').textContent = 'Error: '+(e.reason||e.message||e);
+    }
+  });
 
-      btnAddB.addEventListener('click', async ()=>{ try{ if(!contract) throw new Error('Connect first'); const address = validateAddress(adminHandle.value); setLoading(btnAddB,true); const { handle, proof } = await encryptAddress(address); clog.group('ADMIN addToBlacklist'); clog.table({ handle, proofLen: proof.length }); const tx = await contract.addToBlacklist(handle, proof, { gasLimit: 3_000_000 }); console.log('txHash', tx.hash); await tx.wait(); clog.end(); setStatus('✅ Added to blacklist (encrypted)'); }catch(e){ console.error(e); setStatus('❌ '+e.message); } finally{ setLoading(btnAddB,false); } });
+  // who owns cart?
+  $('#checkOwnerBtn').addEventListener('click', async ()=>{
+    const key = $('#cartKey').value.trim();
+    if(!key) return $('#userStatus').textContent='Enter cart key';
+    try{
+      await ensureConnected();
+      const id = cartIdOf(key);
+      const owner = await contract.ownerOf(id);
+      $('#userStatus').textContent = `Owner: ${short(owner)} ${owner.toLowerCase()===address.toLowerCase()?'(you)':''}`;
+    }catch(e){ $('#userStatus').textContent = 'Error: '+(e.reason||e.message||e); }
+  });
 
-      refreshButtons();
-      if (window.ethereum?.on){ window.ethereum.on('chainChanged', ()=> window.location.reload()); window.ethereum.on('accountsChanged', ()=> window.location.reload()); }
-    </script>
-  </body>
+  // read aggregates
+  $('#readBtn').addEventListener('click', async ()=>{
+    const key = $('#readCartKey').value.trim();
+    if(!key) return $('#readStatus').textContent='Enter cart key';
+    try{
+      await ensureConnected();
+      const id = cartIdOf(key);
+      $('#readStatus').textContent = 'Fetching handles…';
+      const hTot = await contract.getTotalHandle(id);
+      const hCats = await contract.getCategoryHandles(id);
+
+      // show handles (right card mirrors this too)
+      $('#hTotal').textContent = hTot;
+      $('#hCats').textContent = 'cats:\n' + hCats.map((h,i)=> `${i}: ${h}`).join('\n');
+
+      $('#readStatus').textContent = 'Decrypting…';
+      const vals = await decryptMany([hTot, ...hCats]);
+
+      const total = vals[0], cats = vals.slice(1);
+      $('#outTotal').textContent = total.toString();
+      for(let i=0;i<CONFIG.MAX_CATS;i++) $('#c'+i).textContent = (cats[i]??0n).toString();
+      $('#readStatus').textContent = 'Done';
+    }catch(e){
+      console.error(e);
+      $('#readStatus').textContent = 'Error: '+(e.reason||e.message||e);
+    }
+  });
+
+  // convenience: mirror handles when admin key changes
+  async function refreshHandlesMirror(){
+    const key = $('#adminCartKey').value.trim();
+    if(!key || !contract) return;
+    try{
+      const id = cartIdOf(key);
+      const hTot = await contract.getTotalHandle(id);
+      const hCats = await contract.getCategoryHandles(id);
+      $('#hTotal').textContent = hTot;
+      $('#hCats').textContent = 'cats:\n' + hCats.map((h,i)=> `${i}: ${h}`).join('\n');
+    }catch{}
+  }
+  $('#adminCartKey').addEventListener('input', refreshHandlesMirror);
+</script>
+</body>
 </html>
